@@ -1,0 +1,12 @@
+{% extends "::base.html.twig" %}
+
+{% block javascripts %}
+    {{parent()}}
+    {% javascripts 
+        "@EditorImgeditorBundle/Resources/public/scripts/jquery.js" 
+        "@EditorImgeditorBundle/Resources/public/scripts/underscore.js" 
+        "@EditorImgeditorBundle/Resources/public/scripts/backbone.js" 
+    %}
+        <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}

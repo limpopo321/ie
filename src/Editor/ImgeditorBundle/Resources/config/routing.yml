@@ -1,0 +1,3 @@
+editor_imgeditor_homepage:
+    path:  /
+    defaults: { _controller: EditorImgeditorBundle:Default:index }
