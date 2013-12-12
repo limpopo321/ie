@@ -1,7 +1,23 @@
-editor_imgeditor_homepage:
+editor_imgeditor_index:
     path:  /
     defaults: { _controller: EditorImgeditorBundle:Default:index }
     
-editor_imgeditor_loaded:
-    path: /{hash_kroku}/{path}
-    defaults: { _controller: EditorImgeditorBundle:Loaded:index }
+editor_imgeditor_project:
+    path: /create/
+    defaults: { _controller: EditorImgeditorBundle:Default:create }
+    
+editor_imgeditor_rotate:
+    path: /rotate/{hash_kroku}
+    defaults: { _controller: EditorImgeditorBundle:Default:rotate }
+    
+editor_imgeditor_crop:
+    path: /crop/{hash_kroku}
+    defaults: { _controller: EditorImgeditorBundle:Default:crop }
+    
+editor_imgeditor_undo:
+    path: /undo/{hash_kroku}
+    defaults: { _controller: EditorImgeditorBundle:Default:undo }
+    
+editor_imgeditor_redo:
+    path: /redo/{hash_kroku}
+    defaults: { _controller: EditorImgeditorBundle:Default:redo }
