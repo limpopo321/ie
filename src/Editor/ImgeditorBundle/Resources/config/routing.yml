@@ -1,3 +1,7 @@
 editor_imgeditor_homepage:
     path:  /
     defaults: { _controller: EditorImgeditorBundle:Default:index }
+    
+editor_imgeditor_loaded:
+    path: /{hash_kroku}/{path}
+    defaults: { _controller: EditorImgeditorBundle:Loaded:index }
