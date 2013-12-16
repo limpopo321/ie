@@ -31,12 +31,9 @@ class DefaultController extends Controller {
      *  - tworzymy odpowiedni rekord w bazie danych
      * 
      */
-    public function createAction() {
-        
+    public function createAction() {      
         // 1.
-        // Zapisywanie obrazka
-        
-        
+        // Zapisywanie obrazka (obrazek jest przechowywany w tablicy $_FILES[image]
 
         // 2.
         // Tworzenie odpowiedzi
