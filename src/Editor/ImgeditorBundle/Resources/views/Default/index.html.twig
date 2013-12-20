@@ -2,48 +2,57 @@
 
 {% block body %}
 
-    <div id="step-1-template">
-        <form  id="f-image" enctype="multipart/form-data">
-            <input type="file" id="image" value="wybierz zdjęcie" />
-        </form>
-    </div>
+
+<div id="step-1-template">
+    {{ form_start(form, {"attr": {"id": "f-image"}}) }}
+          {{ form_row(form.file, {"id": "file"} ) }}
+    {{ form_end(form) }}
+</div>
+
+{#
+
+    <form  id="f-image" enctype="multipart/form-data">
+        <input type="file" id="image" value="wybierz zdjęcie" />
+    </form>
+</div>
+#}
 
     {% raw %}
-    <script>
-        window.onload = function() {
+<script>
+    window.onload = function() {
 
-            var App = (function() {
-                "use strict";
+        var App = (function() {
+            "use strict";
 
-                var ViewUpload = Backbone.View.extend({
-                    el: $("#step-1-template"),
-                    events: {
-                        "change #image": "upload"
-                    },
-                    initialize: function() {
-                        _.bindAll(this, "upload");
+            var ViewUpload = Backbone.View.extend({
+                el: $("#step-1-template"),
+                events: {
+                    "change #file": "upload"
                 },
-                    upload: function() {
+                initialize: function() {
+                    _.bindAll(this, "upload");
+                },
+                upload: function() {
 
-                        console.log(this);
-                        var formData = new FormData(this.$el.find("#f-image").get(0));
-                        var file = this.$el.find("#image").get(0).files[0];
-                        formData.append("image", file);
-                        $.ajax({
-                            url: {% endraw %}"{{ path("editor_imgeditor_project") }}"{% raw %},
-                                    data: formData,
-                            processData: false,
-                            contentType: false,
-                            method: "POST"
-                        });
-                    }
-                });
+                    console.log(this);
+                    var formData = new FormData(this.$el.find("#f-image").get(0));
+                    var file = this.$el.find("#file").get(0).files[0];
+                    formData.append("file", file);
+                    $.ajax({
+                        url: {% endraw %}"{{ path("editor_imgeditor_project") }}"{% raw %},
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        method: "POST"
+                    });
+                }
+            });
 
-                var viewUpload = new ViewUpload();
+            var viewUpload = new ViewUpload();
 
-            })();
-        };
-        </script>
+        })();
+    };
+    </script>
     {% endraw %}
 
     <div id="step-edit-image">

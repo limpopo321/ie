@@ -3,8 +3,8 @@
 namespace Editor\ImgeditorBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Editor\ImgeditorBundle\Entity\Photo;
-use Editor\ImgeditorBundle\Form\PhotoType;
+use Editor\ImgeditorBundle\Entity\Action;
+use Editor\ImgeditorBundle\Form\Type\ActionType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -18,8 +18,14 @@ class DefaultController extends Controller {
      * w formacie JSON
      * 
      */
-    public function indexAction() {
-        return $this->render('EditorImgeditorBundle:Default:index.html.twig');
+    public function indexAction() {        
+        $action         = new Action();        
+        $form           = $this->createForm(new ActionType(), $action);  
+        
+      
+        
+        
+        return $this->render('EditorImgeditorBundle:Default:index.html.twig', array('form' => $form->createView()));
     }
 
     /**
@@ -31,10 +37,51 @@ class DefaultController extends Controller {
      *  - tworzymy odpowiedni rekord w bazie danych
      * 
      */
-    public function createAction() {      
+    public function createAction(Request $request) {      
         // 1.
         // Zapisywanie obrazka (obrazek jest przechowywany w tablicy $_FILES[image]
 
+        $action = new Action();
+        $form = $this->createForm(new ActionType(), $action);
+        
+        
+        $form->handleRequest($request);
+        
+        
+        if($form->isValid()){
+            
+            // Zapisywanie obrazka
+            $action->upload();
+            
+            // Tworzenie hasha projektu
+            $id_project = md5(time());
+            $session    = $this->get('session');
+            $session->set("id_project", $id_project);
+            
+            // Zapisywanie danych
+            $em = $this->getDoctrine()->getManager();
+            $action->setIdProject($id_project);
+            $action->setPosition(0);
+            $em->persist($action);           
+            $em->flush();
+            
+            exit('after_save');
+            
+            
+            
+            
+            
+        }
+       
+        
+        $formIsValid = $form->isValid();
+       
+        print_r($formIsValid); exit;
+        
+        
+        
+        
+        
         // 2.
         // Tworzenie odpowiedzi
         $data = array(
