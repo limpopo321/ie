@@ -97,6 +97,16 @@ class Action {
     public function getPosition(){
        return $this->position;
     }
+    
+    
+    public function setUpdated($updated){
+        $this->updated = $updated;
+    }
+    
+    
+    public function setCreated($created){
+        $this->created = $created;
+    }
         
     
 
@@ -158,7 +168,7 @@ class Action {
         );
 
 
-        $this->path = $this->getFile()->getClientOriginalName();
+        $this->image = $this->getFile()->getClientOriginalName();
         $this->file = null;
     }
 

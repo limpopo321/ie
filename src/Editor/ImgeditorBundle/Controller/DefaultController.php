@@ -62,6 +62,8 @@ class DefaultController extends Controller {
             $em = $this->getDoctrine()->getManager();
             $action->setIdProject($id_project);
             $action->setPosition(0);
+            $action->setUpdated(new \DateTime());
+            $action->setCreated(new \DateTime());
             $em->persist($action);           
             $em->flush();
             
