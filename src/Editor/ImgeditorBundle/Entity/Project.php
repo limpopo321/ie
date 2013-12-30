@@ -29,7 +29,7 @@ class Project {
     /**
      * @var string
      *
-     * @ORM\Column(name="id_project", type="string")
+     * @ORM\Column(name="id_project", type="string", length=13)
      */
     private $id_project;
 
@@ -101,9 +101,9 @@ class Project {
     public function preUpload() {
         if (null !== $this->file) {
             // zrób cokolwiek chcesz aby wygenerować unikalną nazwę
-            $this->path = sha1(uniqid(rand(1, 999))) . '.' . $this->file->guessExtension();
+            $this->path = uniqid() . '.' . $this->file->guessExtension();
         }      
-        $this->id_project = (md5(time()));
+        $this->id_project = uniqid();
         $this->created = new \DateTime();
     }
 

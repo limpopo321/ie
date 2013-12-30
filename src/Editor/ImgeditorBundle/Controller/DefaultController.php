@@ -56,11 +56,9 @@ class DefaultController extends Controller {
 
             $id_action = uniqid();
             
-//            $form->getData();
-            
             $action->setIdAction($id_action);
             $action->setImage($project->getPath());
-            $action->setJsonData('jakieś dane json'); // do ustalenia....
+            // json_data nie będzie
             $action->setPosition(0); //do pomyślenia ...
             $action->setUpdated(new \DateTime());
             $action->setProject($project);
