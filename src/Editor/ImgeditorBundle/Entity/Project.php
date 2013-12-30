@@ -48,8 +48,7 @@ class Project {
 
     /**
      *
-     * @var string
-     * @ORM\Column(name="path", type="string")
+     * @var string 
      */
     private $path;
 
@@ -94,6 +93,8 @@ class Project {
     }
 
     /**
+     * 
+     * 
      * @ORM\PrePersist()
      * @ORM\PreUpdate()
      */
@@ -101,9 +102,7 @@ class Project {
         if (null !== $this->file) {
             // zrób cokolwiek chcesz aby wygenerować unikalną nazwę
             $this->path = sha1(uniqid(rand(1, 999))) . '.' . $this->file->guessExtension();
-            $_SESSION['path'] = $this->path;
-        }
-
+        }      
         $this->id_project = (md5(time()));
         $this->created = new \DateTime();
     }
@@ -116,7 +115,6 @@ class Project {
         if (null === $this->file) {
             return;
         }
-
         // musisz wyrzucać tutaj wyjątek jeśli plik nie może zostać przeniesiony
         // w tym przypadku encja nie zostanie zapisana do bazy
         // metoda move() obiektu UploadedFile robi to automatycznie

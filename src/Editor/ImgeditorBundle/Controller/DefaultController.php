@@ -23,10 +23,10 @@ class DefaultController extends Controller {
         $project = new Project();
         $form = $this->createForm(new ProjectType(), $project);
 
+        
 
 
-
-        return $this->render('EditorImgeditorBundle:Default:index.html.twig', array('form' => $form->createView()));
+        return $this->render('EditorImgeditorBundle:Default:index.html.twig', array('form' => $form->createView(), 'baseUrl' => $this->getRequest()->getBaseUrl()));
     }
 
     /**
@@ -55,8 +55,11 @@ class DefaultController extends Controller {
             $em->persist($project);
 
             $id_action = uniqid();
+            
+//            $form->getData();
+            
             $action->setIdAction($id_action);
-            $action->setImage($_SESSION['path']);
+            $action->setImage($project->getPath());
             $action->setJsonData('jakieś dane json'); // do ustalenia....
             $action->setPosition(0); //do pomyślenia ...
             $action->setUpdated(new \DateTime());
