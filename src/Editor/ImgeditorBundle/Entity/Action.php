@@ -3,8 +3,7 @@
 namespace Editor\ImgeditorBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-
+use Editor\ImgeditorBundle\Entity\Project;
 
 /**
  * Action
@@ -13,12 +12,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * @ORM\Entity
  */
 class Action {
-
-    /**
-     *
-     * @var UploadedFile
-     */
-    public $file;
 
     /**
      * @var integer
@@ -30,146 +23,179 @@ class Action {
     private $id;
 
     /**
-     * @var string Hash projektu (md5)
+     * @var int
      *
-     * @ORM\Column(name="id_project", type="string", length=32)        
+     * @ORM\Column(name="id_action", type="integer", length=40)
      */
-    private $idProject;
+    private $id_action;
 
     /**
-     * @var string Hash akcji (md5)
+     * @var integer
      *
-     * @ORM\Column(name="id_action", type="string", length=32, nullable=true)        
+     * @ORM\Column(name="position", type="integer", length=40)
      */
-    private $idAction;
+    private $position;
 
     /**
+     * @var string
      *
-     * @var integer Kolejny numer akcji w obrebie danego projektu (do operacji "wtecz" i "do przodu")
-     * 
-     * @ORM\Column(name="position", type="integer")
+     * @ORM\Column(name="image", type="string", length=40)
      */
-    public $position;
-
-    /*     * * 
-     * 
-     * @var string Nazwa obrazka
-     * 
-     * @ORM\Column(name="image", type="string", nullable=true)
-     */
-    public $image;
+    private $image;
 
     /**
-     * @var string Dodatkowe dane w formie zserializowanej tablicy powiazane z
-     * krokiem edycji
-     * @ORM\Column(type="string", length=1000)
+     * @var string
+     *
+     * @ORM\Column(name="json_data", type="string", length=1000)
      */
-    public $jsonData;
+    private $json_data;
 
     /**
+     * @var \DateTime
      *
-     * @var string Czas utworzenia akcji
-     * @ORM\Column (type="datetime") 
+     * @ORM\Column(name="updated", type="datetime")
      */
-    public $created;
+    private $updated;
 
     /**
-     *
-     * @var string Czas aktualizacji akcji
-     * @ORM\Column (type="datetime") 
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="actions", cascade={"persist"})
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id")
      */
-    public $updated;
-    
-    
-    public function setIdProject($idProject){
-        $this->idProject = $idProject;
-    }    
-    
-    public function getIdProject($idProject){
-       return $this->idProject;
+    private $project;
+
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getId() {
+        return $this->id;
     }
-    
-    
-    public function setPosition($position){
+
+    /**
+     * Set id_action
+     *
+     * @param integer $idAction
+     * @return Action
+     */
+    public function setIdAction($idAction) {
+        $this->id_action = $idAction;
+
+        return $this;
+    }
+
+    /**
+     * Get id_action
+     *
+     * @return integer 
+     */
+    public function getIdAction() {
+        return $this->id_action;
+    }
+
+    /**
+     * Set position
+     *
+     * @param integer $position
+     * @return Action
+     */
+    public function setPosition($position) {
         $this->position = $position;
+
+        return $this;
     }
-    
-    public function getPosition(){
-       return $this->position;
-    }
-    
-    
-    public function setUpdated($updated){
-        $this->updated = $updated;
-    }
-    
-    
-    public function setCreated($created){
-        $this->created = $created;
-    }
-        
-    
 
     /**
-     * Sets file.
+     * Get position
      *
-     * @param UploadedFile $file
+     * @return integer 
      */
-    public function setFile(UploadedFile $file) {
-        $this->file = $file;
+    public function getPosition() {
+        return $this->position;
     }
 
     /**
-     * Gets file
-     * 
-     * @return UploadedFile 
+     * Set image
+     *
+     * @param string $image
+     * @return Action
      */
-    public function getFile() {
-        return $this->file;
+    public function setImage($image) {
+        $this->image = $image;
+
+        return $this;
     }
 
     /**
-     * @param FormBuilderInterface $builder
-     * @param array $options
+     * Get image
+     *
+     * @return string 
      */
-    public function buildForm(FormBuilderInterface $builder, array $options) {
-        $builder
-                ->add('file', 'file', array(
-                    'label' => 'Wybierz zjęcie'
-                ))
-
-        ;
+    public function getImage() {
+        return $this->image;
     }
 
-    public function getAbsolutePath() {
-        return $this->getUploadRootDir() . $this->getUploadDir() . '/' . $this->path;
+    /**
+     * Set json_data
+     *
+     * @param string $jsonData
+     * @return Action
+     */
+    public function setJsonData($jsonData) {
+        $this->json_data = $jsonData;
+
+        return $this;
     }
 
-    public function getWebPath() {
-        return $this->getUploadDir() . '/' . $this->path;
+    /**
+     * Get json_data
+     *
+     * @return string 
+     */
+    public function getJsonData() {
+        return $this->json_data;
     }
 
-    public function getUploadRootDir() {
-        return __DIR__ . '/../../../../web/uploads/documents/';
+    /**
+     * Set updated
+     *
+     * @param \DateTime $updated
+     * @return Action
+     */
+    public function setUpdated($updated) {
+        $this->updated = $updated;
+
+        return $this;
     }
 
-    public function getUploadDir() {
-        return 'uploads/documents';
+    /**
+     * Get updated
+     *
+     * @return \DateTime 
+     */
+    public function getUpdated() {
+        return $this->updated;
     }
 
-    public function upload() {      
-        
-        if (null === $this->getFile()) {
-            return;
-        }
+    /**
+     * Set project
+     *
+     * @param $project
+     * @return Action
+     */
+    public function setProject(\Editor\ImgeditorBundle\Entity\Project $project) {
+        $this->project = $project;
 
-        $this->getFile()->move(
-                $this->getUploadRootDir(), $this->getFile()->getClientOriginalName()
-        );
+        return $this;
+    }
 
-
-        $this->image = $this->getFile()->getClientOriginalName();
-        $this->file = null;
+    /**
+     * Get project
+     *
+     * @return \Editor\ImgeditorBundle\Entity\Project 
+     */
+    public function getProject() {
+        return $this->project;
     }
 
 }
