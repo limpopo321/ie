@@ -3,10 +3,11 @@
 namespace Editor\ImgeditorBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Editor\ImgeditorBundle\Entity\Action;
-use Editor\ImgeditorBundle\Form\Type\ActionType;
+use Editor\ImgeditorBundle\Entity\Project;
+use Editor\ImgeditorBundle\Form\ProjectType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Editor\ImgeditorBundle\Entity\Action;
 
 class DefaultController extends Controller {
 
@@ -18,13 +19,13 @@ class DefaultController extends Controller {
      * w formacie JSON
      * 
      */
-    public function indexAction() {        
-        $action         = new Action();        
-        $form           = $this->createForm(new ActionType(), $action);  
-        
-      
-        
-        
+    public function indexAction() {
+        $project = new Project();
+        $form = $this->createForm(new ProjectType(), $project);
+
+
+
+
         return $this->render('EditorImgeditorBundle:Default:index.html.twig', array('form' => $form->createView()));
     }
 
@@ -37,86 +38,43 @@ class DefaultController extends Controller {
      *  - tworzymy odpowiedni rekord w bazie danych
      * 
      */
-    public function createAction(Request $request) {      
+    public function createAction(Request $request) {
         // 1.
         // Zapisywanie obrazka (obrazek jest przechowywany w tablicy $_FILES[image]
 
+        $project = new Project();
         $action = new Action();
-        $form = $this->createForm(new ActionType(), $action);
-        
-        
+        $form = $this->createForm(new ProjectType(), $project);
         $form->handleRequest($request);
-        
-        
-        if($form->isValid()){
-            
+
+        if ($form->isValid()) {
+
             // Zapisywanie obrazka
-            $action->upload();
-            
-            // Tworzenie hasha projektu
-            $id_project = md5(time());
-            $session    = $this->get('session');
-            $session->set("id_project", $id_project);
-            
             // Zapisywanie danych
             $em = $this->getDoctrine()->getManager();
-            $action->setIdProject($id_project);
-            $action->setPosition(0);
+            $em->persist($project);
+
+            $id_action = uniqid();
+            $action->setIdAction($id_action);
+            $action->setImage($_SESSION['path']);
+            $action->setJsonData('jakieś dane json'); // do ustalenia....
+            $action->setPosition(0); //do pomyślenia ...
             $action->setUpdated(new \DateTime());
-            $action->setCreated(new \DateTime());
-            $em->persist($action);           
+            $action->setProject($project);
+            $em->persist($action);
+
             $em->flush();
-            
-            exit('after_save');
-            
-            
-            
-            
-            
         }
-       
-        
-        $formIsValid = $form->isValid();
-       
-        print_r($formIsValid); exit;
-        
-        
-        
-        
-        
+
         // 2.
         // Tworzenie odpowiedzi
         $data = array(
             'status' => 'OK',
-            'hash_kroku' => 'xyzxyzxyzxyzxyzxyz',
-            'image' => 'http://domena.pl/sciezka/do/obrazka.jpg'
+            'id_action' => $id_action,
+            'image' => $_SERVER['SERVER_NAME'] . '/' . $project->getWebPath()
         );
         return new JsonResponse($data, 200, array('Content-Type: application/json'));
     }
-
-//    public function indexAction(Request $request) {
-//        $photo = new Photo();
-//
-//
-//        $em = $this->getDoctrine()->getManager();
-//        $form = $this->createForm(new PhotoType(), $photo, array(
-//            'method' => 'POST',
-//            'action' => $this->generateUrl('editor_imgeditor_homepage')
-//        ));
-//
-//        if ($request->getMethod() == 'POST') {
-//
-//            $form->handleRequest($request);
-//
-//            if ($form->isValid()) {
-//                $em->persist($photo);
-//                $em->flush();
-//                return $this->redirect($this->generateUrl('editor_imgeditor_loaded', array('hash_kroku' => $_COOKIE['hash_kroku'], 'path' => $_COOKIE['path'])));
-//            }
-//        }
-//        return $this->render('EditorImgeditorBundle:Default:index.html.twig', array('form' => $form->createView(),));
-//        
-//    }
 
     /**
      * Obracanie zdjecia o 90 stopni zgodnie ze wskazowkami zegara
