@@ -1,6 +1,17 @@
 {% extends "EditorImgeditorBundle::layout.html.twig" %}
 
+
+
+
+
 {% block body %}
+
+
+{% raw %}
+<script id="tpl-image" type="text/template">
+    <img src="<%=data.src%>" />    
+</script>
+{% endraw %}
 
 
 <div id="step-1-template">
@@ -8,6 +19,9 @@
           {{ form_row(form.file, {"id": "file"} ) }}
     {{ form_end(form) }}
 </div>
+
+<a id="route_test">Testuj routing</a>
+
 
 {#
 
@@ -17,12 +31,26 @@
 </div>
 #}
 
-    {% raw %}
+{% raw %}
 <script>
     window.onload = function() {
 
         var App = (function() {
             "use strict";
+
+            Backbone.emulateHTTP = true;
+            Backbone.emulateJSON = true;
+
+            var Image = Backbone.Model.extend({
+                defaults: {
+                    src: "",
+                    id_action: ""
+                }
+
+            });
+
+
+
 
             var ViewUpload = Backbone.View.extend({
                 el: $("#step-1-template"),
@@ -33,8 +61,6 @@
                     _.bindAll(this, "upload");
                 },
                 upload: function() {
-
-                    console.log(this);
                     var formData = new FormData(this.$el.find("#f-image").get(0));
                     var file = this.$el.find("#file").get(0).files[0];
                     formData.append("file", file);
@@ -50,20 +76,110 @@
 
             var viewUpload = new ViewUpload();
 
+
+            var AppRouter = Backbone.Router.extend({
+                routes: {
+                    "action/:id_action": "update"
+                },
+                update: function(id_action) {
+                    console.log("id_action", id_action);
+                }
+            });
+
+            var router = new AppRouter();
+
+
+            Backbone.history.start({
+                pushState: true,
+                root: "{% endraw %}{{ baseUrl }}{% raw %}/"
+            });
+
+
+            $("#route_test").bind("click", function(e) {
+                console.log("click");
+                e.preventDefault();
+                router.navigate("action/123456789012345dsswssw3234343" + Math.random(), {trigger: true});
+            });
+            
+            
+            var ViewEditor = Backbone.View.extend({
+                
+                el: $("#step-edit-image"),
+                template: _.template($("#tpl-image").html()),
+                
+                events: {
+                    "click #btn-rotate": "rotate",
+                    "click #btn-undo": "undo"
+                },
+                
+                initialize: function(){
+                    _.bindAll(this, "rotate", "undo", "render");
+                    this.model.on("change", this.render);                    
+                },
+                
+                render: function(){
+                  this.$el.html(this.template({data: this.model.attributes}));  
+                },                
+                
+                rotate: function(){
+                    console.log("rotate");
+                },
+                
+                undo: function(){
+                    console.log("undo");
+                }        
+            });
+            
+            
+            var image = new Image();
+            var editor = new ViewEditor({
+                model: image
+            })
+
+
+
         })();
     };
-    </script>
-    {% endraw %}
+</script>
+{% endraw %}
 
-    <div id="step-edit-image">
-        <div>
-            <ul id="toolbar">
-                <li><a class="btn">Obróć</a></li>
-                <li><a class="btn">Przytnij</a></li>
-                <li><a class="btn">Cofnij</a></li>
-            </ul>
-        </div>
-        <div id="scene">
-        </div>
+{% raw %}
+<style type="text/css">
+    #toolbar {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+    }
+
+    #toolbar li {
+        border: 1px solid red;
+        float: left;
+        padding: 5px;
+        cursor: pointer;
+    }
+
+    #scene {
+        width: 900px;
+        height: 700px;
+        border: 1px solid #ddd;        
+    }
+
+</style>
+
+{% endraw %}
+
+
+<div id="step-edit-image">
+    <div style="overflow: hidden;">
+        <ul id="toolbar">
+            <li><a id="btn-rotate" class="btn">Obróć</a></li>
+            <li><a id="btn-crop" class="btn">Przytnij</a></li>
+            <li><a id="btn-undo" class="btn">Cofnij</a></li>
+        </ul>
     </div>
+
+    <div id="scene" style="overflow: hidden;">
+    </div>
+</div>
 {% endblock %}
