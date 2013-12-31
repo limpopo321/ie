@@ -23,30 +23,30 @@ class Action {
     private $id;
 
     /**
-     * @var int
+     * @var string
      *
-     * @ORM\Column(name="id_action", type="integer", length=40)
+     * @ORM\Column(name="id_action", type="string", length=13)
      */
     private $id_action;
 
     /**
-     * @var integer
+     * @var string
      *
-     * @ORM\Column(name="position", type="integer", length=40)
+     * @ORM\Column(name="position", type="string", length=13)
      */
     private $position;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="image", type="string", length=40)
+     * @ORM\Column(name="image", type="string", length=13)
      */
     private $image;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="json_data", type="string", length=1000)
+     * @ORM\Column(name="json_data", type="string", length=1000, nullable=true)
      */
     private $json_data;
 
@@ -75,7 +75,7 @@ class Action {
     /**
      * Set id_action
      *
-     * @param integer $idAction
+     * @param string $idAction
      * @return Action
      */
     public function setIdAction($idAction) {
@@ -87,7 +87,7 @@ class Action {
     /**
      * Get id_action
      *
-     * @return integer 
+     * @return string 
      */
     public function getIdAction() {
         return $this->id_action;
@@ -141,7 +141,7 @@ class Action {
      * @param string $jsonData
      * @return Action
      */
-    public function setJsonData($jsonData) {
+    public function setJsonData($jsonData=null) {
         $this->json_data = $jsonData;
 
         return $this;
