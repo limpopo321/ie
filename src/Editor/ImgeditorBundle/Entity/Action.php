@@ -39,7 +39,7 @@ class Action {
     /**
      * @var string
      *
-     * @ORM\Column(name="image", type="string", length=13)
+     * @ORM\Column(name="image", type="string", length=24)
      */
     private $image;
 
