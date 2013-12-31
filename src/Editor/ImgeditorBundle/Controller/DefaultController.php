@@ -8,6 +8,7 @@ use Editor\ImgeditorBundle\Form\ProjectType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Editor\ImgeditorBundle\Entity\Action;
+use Imagick;
 
 class DefaultController extends Controller {
 
@@ -50,9 +51,10 @@ class DefaultController extends Controller {
             // Zapisywanie danych
             $em = $this->getDoctrine()->getManager();
             $em->persist($project);
-            $action->setIdAction(md5(uniqid()));
+            $id_action = uniqid();
+            $action->setIdAction($id_action);
             $action->setImage($project->getPath());
-            $action->setJsonData('jakieś dane json'); // do ustalenia....
+            // json_data nie będzie
             $action->setPosition(0); //do pomyślenia ...
             $action->setUpdated(new \DateTime());
             $action->setProject($project);
@@ -74,11 +76,65 @@ class DefaultController extends Controller {
     /**
      * Obracanie zdjecia o 90 stopni zgodnie ze wskazowkami zegara
      */
-    public function rotateAction($id_action) { 
-        
-        
-             
-        return new JsonResponse($data);
+
+    public function rotateAction() {
+        // poprawić dane z requesta
+        $id_project = '52c1edc201f64';
+        $id_action_post = '52c1fe239e3b0';
+        $degrees = 13;
+        // pobranie adresu do obrazka, ale lepiej by bylo jakbyś mi go przekazał 
+        //będzie znacznie mniej kombinacji
+        $project = $this->getDoctrine()->getRepository('EditorImgeditorBundle:Project')->findOneBy(
+                array('id_project' => $id_project));
+
+        $action = $this->getDoctrine()->getRepository('EditorImgeditorBundle:Action')->findOneBy(
+                array('project' => $project->getId(), 'id_action' => $id_action_post), array('id' => 'DESC'), 1);
+        //ustalenie ostatniej pozycji akcji w projekcie i...
+        $action_position = $this->getDoctrine()->getRepository('EditorImgeditorBundle:Action')->findOneBy(
+                array('project' => $project->getId()), array('id' => 'DESC'), 1);
+        $position = $action_position->getPosition();
+        //... nadanie nowego nr pozycji
+        $position++;
+        $image = $action->getImage();
+
+        //nowa nazwa pliku po obróceniu
+        $new_img_name = uniqid() . '.jpeg';
+
+        $new_path = $project->getUploadDir() . '/' . $new_img_name;
+
+        // 2.
+        // obrót obrazka
+
+        $obrazek = new Imagick($project->getUploadDir() . '/' . $image);
+        $obrazek->rotateimage(new \ImagickPixel(), $degrees);
+        $obrazek->writeimage($new_path);
+
+        // 3.
+        // zapisanie danych do bazy 
+        // jeśli obrazek 'rotate' wykona się poprawnie
+
+        $em = $this->getDoctrine()->getManager();
+
+        $id_action = uniqid();
+        $action = new Action();
+        $action->setIdAction($id_action);
+        $action->setImage($new_img_name);
+        // json_data nie będzie
+        $action->setPosition($position); //do pomyślenia ...
+        $action->setUpdated(new \DateTime());
+        $action->setProject($project);
+        $em->persist($action);
+        $em->flush();
+
+        // 4.
+        // Tworzenie odpowiedzi
+        $data = array(
+            'status' => 'OK',
+            'id_action' => $id_action,
+            'image' => $_SERVER['SERVER_NAME'] . '/' . $new_path
+        );
+        return new JsonResponse($data, 200, array('Content-Type: application/json'));
+
     }
 
     /**
