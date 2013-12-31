@@ -1,13 +1,22 @@
 editor_imgeditor_index:
     path:  /
+    defaults: { _controller: EditorImgeditorBundle:Default:index}
+    
+editor_imgeditor_action:
+    path: /action/{id_action}
     defaults: { _controller: EditorImgeditorBundle:Default:index }
+    
+editor_imgeditor_fetch_action:
+    path: /fetch/{id_action}
+    defaults: { _controller: EditorImgeditorBundle:Default:fetch }
     
 editor_imgeditor_project:
     path: /create/
-    defaults: { _controller: EditorImgeditorBundle:Default:create }
+    defaults: { _controller: EditorImgeditorBundle:Default:create, id_action: "" }   
+
     
 editor_imgeditor_rotate:
-    path: /rotate/{hash_kroku}
+    path: /rotate/{id_action}
     defaults: { _controller: EditorImgeditorBundle:Default:rotate }
     
 editor_imgeditor_crop:

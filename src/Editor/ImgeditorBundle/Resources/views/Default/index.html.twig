@@ -1,10 +1,9 @@
 {% extends "EditorImgeditorBundle::layout.html.twig" %}
 
-
-
-
-
 {% block body %}
+
+
+
 
 
 {% raw %}
@@ -13,17 +12,40 @@
 </script>
 {% endraw %}
 
+<script type="text/template" id="tpl-project">
+    <div id="cnt-project">       
+        <div>
+        {{ form_start(form, {"attr": {"id": "f-image"}}) }}
+              {{ form_row(form.file, {"id": "file"} ) }}
+        {{ form_end(form) }}    
+        </div>
+    </div>
+</script>
 
-<div id="step-1-template">
-    {{ form_start(form, {"attr": {"id": "f-image"}}) }}
-          {{ form_row(form.file, {"id": "file"} ) }}
-    {{ form_end(form) }}
-</div>
+
+<script type="text/template" id="tpl-action">
+    <div id="step-edit-image">
+        <div style="overflow: hidden;">
+            <ul id="toolbar">
+                <li><a id="btn-rotate" class="btn">Obróć</a></li>
+                <li><a id="btn-crop" class="btn">Przytnij</a></li>
+                <li><a id="btn-undo" class="btn">Cofnij</a></li>
+            </ul>
+        </div>
+
+        <div id="scene" style="overflow: hidden;">
+        </div>
+    </div>
+</script>
+
+
+
+{#
 
 <a id="route_test">Testuj routing</a>
 
 
-{#
+
 
     <form  id="f-image" enctype="multipart/form-data">
         <input type="file" id="image" value="wybierz zdjęcie" />
@@ -42,70 +64,96 @@
             Backbone.emulateJSON = true;
 
             var Image = Backbone.Model.extend({
+                idAttribute: "id_action",
+                urlRoot: "/app_dev.php/fetch/",
                 defaults: {
                     src: "",
                     id_action: ""
                 }
-
             });
+            
+            var image = new Image();
+            
+            
+            
+            
+           // var imageTest  = new Image({
+            //    id_action: "0113EABA2701AD04E4EBB8BB8B8BAA26"           
+            //});
+            
+            //imageTest.on("change", function(){
+            //    console.log("change arguments", arguments);
+            //});
+            
+            //imageTest.set("id_action", "nllldldld", {silent: true});            
+            
+            //imageTest.fetch();
+            
+            
+          
+            //return;
+            
+            
+            var ActionQueue = {
+                 getIdAction: function(){
+                     return 'xxxxxyyyxxxxxxxxxxxxyyyyyyyyyyxx' . replace(/[xy]/g, function(c){
+                         var r = Math.random() * 16|0, v = c == 'x' ? r: (r&0x3|0x8);
+                         return v.toString(16);
+                     }).toUpperCase();                     
+                 },
+                
+                 add: function(name, params){
+                     this.name = name;
+                     this.params = params || {};
+                     this.id_action = this.getIdAction();                     
+                 }                
+            };
+            
+            var image = new Image();
 
-
-
-
-            var ViewUpload = Backbone.View.extend({
-                el: $("#step-1-template"),
+            var ViewProject = Backbone.View.extend({
+                
+                
+                template: _.template($("#tpl-project").html()),
+                
                 events: {
                     "change #file": "upload"
                 },
+                
                 initialize: function() {
-                    _.bindAll(this, "upload");
+                    _.bindAll(this, "upload", "render");      
+                    this.render();
                 },
+                
+                
+                render: function(){
+                    this.$el.html(this.template({data: null}));                    
+                },
+                
+                
                 upload: function() {
                     var formData = new FormData(this.$el.find("#f-image").get(0));
                     var file = this.$el.find("#file").get(0).files[0];
                     formData.append("file", file);
+                    ActionQueue.add("project");                    
                     $.ajax({
-                        url: {% endraw %}"{{ path("editor_imgeditor_project") }}"{% raw %},
+                        url: {% endraw %}"{{ path("editor_imgeditor_project")}}/"{% raw %},
                         data: formData,
                         processData: false,
                         contentType: false,
-                        method: "POST"
+                        method: "POST",
+                        success: function(data){                              
+                            router.navigate("action/" + data.id_action, {trigger: true, replace: true});
+                        }
                     });
                 }
             });
-
-            var viewUpload = new ViewUpload();
-
-
-            var AppRouter = Backbone.Router.extend({
-                routes: {
-                    "action/:id_action": "update"
-                },
-                update: function(id_action) {
-                    console.log("id_action", id_action);
-                }
-            });
-
-            var router = new AppRouter();
-
-
-            Backbone.history.start({
-                pushState: true,
-                root: "{% endraw %}{{ baseUrl }}{% raw %}/"
-            });
-
-
-            $("#route_test").bind("click", function(e) {
-                console.log("click");
-                e.preventDefault();
-                router.navigate("action/123456789012345dsswssw3234343" + Math.random(), {trigger: true});
-            });
             
-            
-            var ViewEditor = Backbone.View.extend({
+            var ViewAction = Backbone.View.extend({
                 
-                el: $("#step-edit-image"),
-                template: _.template($("#tpl-image").html()),
+                template: _.template($("#tpl-action").html()),
+                
+                templateImage: _.template($("#tpl-image").html()),
                 
                 events: {
                     "click #btn-rotate": "rotate",
@@ -114,29 +162,79 @@
                 
                 initialize: function(){
                     _.bindAll(this, "rotate", "undo", "render");
-                    this.model.on("change", this.render);                    
+                    this.$el.html(this.template({data: null})); 
+                    this.model.on("change", this.render);     
+                     
                 },
                 
                 render: function(){
-                  this.$el.html(this.template({data: this.model.attributes}));  
+                    this.$el.find("#scene").html(this.templateImage({data: this.model.attributes}));
                 },                
                 
                 rotate: function(){
-                    console.log("rotate");
+                   var url_rotate = "/app_dev.php/rotate/" + this.model.id;
+                   $.post(url_rotate, function(data){
+                        console.log("rotate response", data);   
+                        router.navigate("action/" + data.id_action, {trigger: true, replace: false});
+                   });
                 },
                 
                 undo: function(){
+                
                     console.log("undo");
                 }        
             });
-            
-            
-            var image = new Image();
-            var editor = new ViewEditor({
-                model: image
-            })
 
 
+            var AppRouter = Backbone.Router.extend({                
+                viewProject: null,
+                
+                viewAction: null,                
+            
+                routes: {
+                    "action/:id_action": "action",
+                    "": "project"
+                },
+                
+                project: function(){                       
+                    this.viewProject = new ViewProject();
+                    $("#cnt-app").append(this.viewProject.el);
+                },
+                
+                action: function(id_action) {
+                    console.log("route action");
+                    if(null !== this.viewProject){
+                       this.viewProject.remove();
+                    }     
+                    
+                    if(null === this.viewAction){
+                        this.viewAction = new ViewAction({
+                            model: image
+                        });   
+                        $("#cnt-app").append(this.viewAction.el);
+                    }
+                    
+                    image.set("id_action", id_action, {silent: true});
+                    image.fetch();                   
+                }
+            });
+
+            var router = new AppRouter();
+
+
+            Backbone.history.start({
+                pushState: true,
+               // root: "{% endraw %}{{ baseUrl }}{% raw %}/"
+               root: "app_dev.php"
+            });
+
+
+            $("#route_test").bind("click", function(e) {              
+                e.preventDefault();
+                router.navigate("action/123456789012345dsswssw3234343" + Math.random(), {trigger: true});
+            });
+            
+            
 
         })();
     };
@@ -145,6 +243,22 @@
 
 {% raw %}
 <style type="text/css">
+    
+    #cnt-project {
+        width: 500px;
+        height: 300px;       
+        margin: auto;
+        border: 1px solid #ddd;
+        padding: 5px;
+    }
+    
+    #cnt-project input[type='file']{
+        padding: 10px 15px;
+        
+    }
+    
+    
+    
     #toolbar {
         margin: 0;
         padding: 0;
@@ -169,17 +283,12 @@
 
 {% endraw %}
 
-
-<div id="step-edit-image">
-    <div style="overflow: hidden;">
-        <ul id="toolbar">
-            <li><a id="btn-rotate" class="btn">Obróć</a></li>
-            <li><a id="btn-crop" class="btn">Przytnij</a></li>
-            <li><a id="btn-undo" class="btn">Cofnij</a></li>
-        </ul>
-    </div>
-
-    <div id="scene" style="overflow: hidden;">
-    </div>
+{# Główny kontener aplikacji #}
+<div id="cnt-app">
+    
+    
 </div>
+
+
+
 {% endblock %}

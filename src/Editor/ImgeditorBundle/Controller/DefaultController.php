@@ -19,13 +19,9 @@ class DefaultController extends Controller {
      * w formacie JSON
      * 
      */
-    public function indexAction() {
+    public function indexAction() {        
         $project = new Project();
         $form = $this->createForm(new ProjectType(), $project);
-
-        
-
-
         return $this->render('EditorImgeditorBundle:Default:index.html.twig', array('form' => $form->createView(), 'baseUrl' => $this->getRequest()->getBaseUrl()));
     }
 
@@ -38,10 +34,11 @@ class DefaultController extends Controller {
      *  - tworzymy odpowiedni rekord w bazie danych
      * 
      */
-    public function createAction(Request $request) {
+    public function createAction() {
         // 1.
         // Zapisywanie obrazka (obrazek jest przechowywany w tablicy $_FILES[image]
 
+        $request = $this->getRequest();
         $project = new Project();
         $action = new Action();
         $form = $this->createForm(new ProjectType(), $project);
@@ -53,12 +50,7 @@ class DefaultController extends Controller {
             // Zapisywanie danych
             $em = $this->getDoctrine()->getManager();
             $em->persist($project);
-
-            $id_action = uniqid();
-            
-//            $form->getData();
-            
-            $action->setIdAction($id_action);
+            $action->setIdAction(md5(uniqid()));
             $action->setImage($project->getPath());
             $action->setJsonData('jakieś dane json'); // do ustalenia....
             $action->setPosition(0); //do pomyślenia ...
@@ -73,7 +65,7 @@ class DefaultController extends Controller {
         // Tworzenie odpowiedzi
         $data = array(
             'status' => 'OK',
-            'id_action' => $id_action,
+            'id_action' => $action->getIdAction(),
             'image' => $_SERVER['SERVER_NAME'] . '/' . $project->getWebPath()
         );
         return new JsonResponse($data, 200, array('Content-Type: application/json'));
@@ -82,8 +74,11 @@ class DefaultController extends Controller {
     /**
      * Obracanie zdjecia o 90 stopni zgodnie ze wskazowkami zegara
      */
-    public function rotateAction() {
+    public function rotateAction($id_action) { 
         
+        
+             
+        return new JsonResponse($data);
     }
 
     /**
@@ -91,6 +86,7 @@ class DefaultController extends Controller {
      */
     public function cropAction() {
         
+        exit('crop');
     }
 
     /**
@@ -105,6 +101,60 @@ class DefaultController extends Controller {
      */
     public function redoAction() {
         
+    }
+    
+    
+    
+    /**
+     * 
+     * @param type $id_action
+     * @param type $asAction
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function fetchAction($id_action) {        
+        
+        $response = array(
+            'src' => '',
+            'id_action' => ''            
+        );
+        
+        return new JsonResponse($response);        
+        
+//        if($id_action == 'tojestidikakcjiobracania'){
+//             $response = array(
+//                'src'           => '/uploads/images/b7048e0e5a6636858307958bb9213d60.jpeg',
+//                'id_action'     => $id_action
+//            );
+//        }else{
+//        
+//        
+//            $repository = $this->getDoctrine()->getRepository('EditorImgeditorBundle:Action');
+//            $action = $repository->findOneBy(array('id_action' => $id_action));
+//
+//
+//
+//            $response = array(
+//                'src' => '/uploads/images/' . $action->getImage() . '.jpeg',
+//                'id_action' => $action->getIdAction()
+//            );
+//        }
+//
+//        if ($asAction === true) {
+//           
+//        } else {
+//            return $response;
+//        }
+    }
+    
+    /**
+     * Pobiera rekord obrazka
+     * 
+     * 
+     * @param string $id_action
+     */
+    private function getAction($id_action){
+        //$action = 
+        return $action;
     }
 
 }

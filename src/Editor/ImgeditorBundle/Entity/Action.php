@@ -25,7 +25,7 @@ class Action {
     /**
      * @var int
      *
-     * @ORM\Column(name="id_action", type="integer", length=40)
+     * @ORM\Column(name="id_action", type="string", length=32)
      */
     private $id_action;
 
@@ -164,7 +164,6 @@ class Action {
      */
     public function setUpdated($updated) {
         $this->updated = $updated;
-
         return $this;
     }
 
@@ -196,6 +195,26 @@ class Action {
      */
     public function getProject() {
         return $this->project;
+    }   
+    
+    /*
+    public function getAbsolutePath() {
+        return null === $this->path ? null : $this->getUploadRootDir() . '/' . $this->path;
     }
 
+    public function getWebPath() {
+        return null === $this->path ? null : $this->getUploadDir() . '/' . $this->path;
+    }
+
+    protected function getUploadRootDir() {
+        // the absolute directory path where uploaded documents should be saved
+        return __DIR__ . '/../../../../web/' . $this->getUploadDir();
+    }
+
+    protected function getUploadDir() {
+        // get rid of the __DIR__ so it doesn't screw when displaying uploaded doc/image in the view.
+        return 'uploads/images';
+    }
+    */
+    
 }
