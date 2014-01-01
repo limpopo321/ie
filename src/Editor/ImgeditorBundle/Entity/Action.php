@@ -64,6 +64,18 @@ class Action {
     private $project;
 
     /**
+     * relatywna ścieżka do katalogu z obrazkami
+     * @var type string
+     */
+    private $upload_dir;
+
+    public function getUploadDir() {
+        $project = new Project();
+        $this->upload_dir = $project->getUploadDir();
+        return $this->upload_dir;
+    }
+
+    /**
      * Get id
      *
      * @return integer 
@@ -141,7 +153,7 @@ class Action {
      * @param string $jsonData
      * @return Action
      */
-    public function setJsonData($jsonData=null) {
+    public function setJsonData($jsonData = null) {
         $this->json_data = $jsonData;
 
         return $this;
@@ -195,8 +207,6 @@ class Action {
      */
     public function getProject() {
         return $this->project;
-    } 
-
+    }
 
 }
-

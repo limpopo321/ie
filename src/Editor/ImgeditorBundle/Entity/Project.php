@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Editor\ImgeditorBundle\Entity\Action;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Imagick;
 
 /**
  * Project
@@ -41,7 +42,14 @@ class Project {
     private $created;
 
     /**
-     *
+      * @Assert\Image(
+     *      maxWidth="6000",
+     *      maxHeight="6000", 
+     *      maxWidthMessage="Zdjęcie jest za duże max to {{ limit }}",
+     *      maxHeightMessage="Zdjęcie jest za duże max to {{ limit }}",
+     *      mimeTypes="image/jpeg",
+     *      mimeTypesMessage="Plik, który próbujesz wysłać nie jest poprawym plikiem obrazka. Dopuszczalny do JPEG, JPG, PNG, BMP, GIF"
+     * )
      * @var UploadedFile
      */
     public $file;
@@ -119,6 +127,19 @@ class Project {
         // w tym przypadku encja nie zostanie zapisana do bazy
         // metoda move() obiektu UploadedFile robi to automatycznie
         $this->file->move($this->getUploadRootDir(), $this->path);
+        
+        //resize do maksymalnego rozmiaru 800x600
+        $obrazek = new \Imagick($this->getWebPath());
+        $width = $obrazek->getimagewidth();
+        $height = $obrazek->getimageheight();
+       
+        if($width>800){
+            $obrazek->scaleimage(800, 0);
+            $obrazek->writeimage();
+        }elseif($height>600) {
+            $obrazek->scaleimage(0, 600);
+            $obrazek->writeimage();
+        }
 
         unset($this->file);
     }
