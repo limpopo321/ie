@@ -52,6 +52,7 @@ $.extend(IE.Registry.prototype, {
 
 
 IE.Action = Backbone.Model.extend({
+    
     idAttribute: "id_action",
    
     defaults: {
@@ -101,10 +102,56 @@ IE.ViewProject = Backbone.View.extend({
 
 
 IE.ViewAction = Backbone.View.extend({    
+    
+    
+    selectionEl: null,
+    selectionInstance: null,
+    
+    /**
+     * Anulowanie zaznaczenia obszaru zdjęcia
+     */
+    cancelSelection: function(){     
+        console.log("cancel selection");
+        if(null !== this.selectionEl){
+           $(this.selectionEl).imgAreaSelect({remove: true});
+           this.selectionEl = null;
+           this.selectionInstance = null;
+        }              
+    },
+    
+    /**
+     * Zaznacznie obszaru zdjęcia
+     */
+    select: function(){
+      console.log("select");
+      if(null === this.selectionEl){
+          this.selectionEl          = this.$el.find("img").get(0);
+          this.selectionInstance    =  $(this.selectionEl).imgAreaSelect({
+              handles: true,
+              instance: true
+          });
+      }          
+    },
+    
+    /**
+     * Pobieranie współrzędnych zaznaczenia obszaru zdjęcia
+     */
+    getSelection: function(){
+        if(null === this.selectionInstance){
+            return false;
+        }
+        var selection =  this.selectionInstance.getSelection();  
+        console.log("getSelection.selection", selection);
+        return selection;
+       
+    },    
+    
+    
     events: {
         "click #btn-rotate": "rotate",
         "click #btn-undo": "undo",
-        "click #btn-select": "select"
+        "click #btn-select": "select",
+        "click #btn-crop": "crop",
     },
     initialize: function(options){
         this.idTpl          = options.idTpl;
@@ -121,6 +168,10 @@ IE.ViewAction = Backbone.View.extend({
     render: function() {
         this.$el.find("#scene").html(this.templateImage({data: this.model.attributes}));
     },
+    
+    /**
+     * Obracanie
+     */
     rotate: function() {
         var self = this;
         if(this.areaSelect){
@@ -131,22 +182,40 @@ IE.ViewAction = Backbone.View.extend({
         $.post(url_rotate, function(data) {
             self.router.navigate(self.router.registry.getUrl("urlAction", data.id_action), {trigger: true, replace: false});
         });
-    },
+    },  
     
-    select: function(){
-        var image = this.$el.find("img").get(0);
-        
-        this.areaSelect = $(image).imgAreaSelect({
-           handles: true,
-           instance: true
-        });
-        
-//         this.areaSelect.cancelSelection();
+    /**
+     * Przycinanie
+     */
+    crop: function(){
+      console.log("crop");
+     
+      var self      = this;
+      var selection = this.getSelection();      
+      var url       = this.router.registry.getUrl("urlCrop", this.model.id);
       
-        
-        
+     
+      
+      var data = {
+          x: selection["x1"],
+          y: selection["y1"],
+          w: selection["width"],
+          h: selection["height"]         
+      };
+      
+//      console.log("crop.selection", selection);
+//      console.log("crop.url", url);
+//      console.log("crop.data", data);
+      
+      this.cancelSelection();
+      
+      $.post(url, data, function(data){
+          self.router.navigate(self.router.registry.getUrl("urlAction", data.id_action), {trigger: true, replace: false});
+          
+          
+//          console.log("crop.response");         
+      });
     },
-    
     
     
     undo: function() {

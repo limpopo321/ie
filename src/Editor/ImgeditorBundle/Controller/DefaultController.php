@@ -117,10 +117,11 @@ class DefaultController extends Controller {
     public function cropAction($id_action) {
         // potrzebne mi będą:
         // szerokość, wysokość cropa oraz współrzędne lewego górnego rogu cropa w px oczywiście
-        $crop_width = 380;
-        $crop_height = 200;
-        $x = 20;
-        $y = 50;
+        
+        $x              = $this->getRequest()->request->get('x');
+        $y              = $this->getRequest()->request->get('y');
+        $crop_width     = $this->getRequest()->request->get('w');
+        $crop_height    = $this->getRequest()->request->get('h');
 
         // pobranie danych obrazka z encji
         $dane = $this->getDataFromAction($id_action);

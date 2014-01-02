@@ -8,7 +8,9 @@
 
 {% raw %}
 <script id="tpl-image" type="text/template">
+    <center>
     <img src="<%=data.src%>" />    
+    </center>
 </script>
 {% endraw %}
 
@@ -43,9 +45,70 @@
 {% raw %}
 <script>
     window.onload = function(){
-        var ieoptions = {% endraw %}{{ieoptions | raw}}{% raw %}
+       var ieoptions = {% endraw %}{{ieoptions | raw}}{% raw %}
         
-        IE.init(ieoptions);
+       IE.init(ieoptions);
+        
+      
+        
+        
+        
+       /*
+        var TaskTool = function() {
+           
+        };
+        
+        $.extend(TaskTool.prototype, {
+             activate: function(){
+                console.log("activate");
+            },
+            
+            deactivate: function(){
+                console.log("deactivate");
+            }        
+        
+        });
+        
+        
+        var TaskToolStateMachine = function(){
+        
+        };
+        
+        $.extend(TaskToolStateMachine.prototype, Backbone.Events, {
+            add: function(taskTool){
+            
+                this.bind("change", function(currentTaskTool){                   
+                    if(taskTool == currentTaskTool){
+                        taskTool.activate();                    
+                    }else{
+                        taskTool.deactivate();
+                    }                
+                });
+                
+                taskTool.setActive = $.proxy(function(){
+                    this.trigger("change", taskTool);
+                }, this);
+            
+            }
+        });
+        
+        var task1           = new TaskTool();
+        var task2           = new TaskTool();        
+        var statemachine    = new TaskToolStateMachine();
+        
+        
+        statemachine.add(task1);
+        statemachine.add(task2);
+        
+        
+        
+        statemachine.trigger("change", task1);
+        */
+        
+        
+        
+        
+        
         
        
     
