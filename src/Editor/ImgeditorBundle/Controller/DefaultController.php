@@ -20,7 +20,7 @@ class DefaultController extends Controller {
      * w formacie JSON
      * 
      */
-    public function indexAction() {        
+    public function indexAction() {
         $project = new Project();
         $form = $this->createForm(new ProjectType(), $project);
         
@@ -84,80 +84,46 @@ class DefaultController extends Controller {
             $em->persist($action);
 
             $em->flush();
-        }
 
-        // 2.
-        // Tworzenie odpowiedzi
-        $data = array(
-            'status' => 'OK',
-            'id_action' => $action->getIdAction(),
-            'image' => $_SERVER['SERVER_NAME'] . '/' . $project->getWebPath()
-        );
-        return new JsonResponse($data, 200, array('Content-Type: application/json'));
-    }
+}
+            // 2.
+            // Tworzenie odpowiedzi
+            $data = array(
+                'status' => 'OK',
+                'id_action' => $action->getIdAction(),
+                'image' => $_SERVER['SERVER_NAME'] . '/' . $project->getWebPath()
+            );
+            return new JsonResponse($data, 200, array('Content-Type: application/json'));
+        
+      }
 
     /**
      * Obracanie zdjecia o 90 stopni zgodnie ze wskazowkami zegara
      */
-
-    public function rotateAction() {
+    public function rotateAction($id_action) {
         // poprawić dane z requesta
-        $id_project = '52c1edc201f64';
-        $id_action_post = '52c1fe239e3b0';
-        $degrees = 13;
-        // pobranie adresu do obrazka, ale lepiej by bylo jakbyś mi go przekazał 
-        //będzie znacznie mniej kombinacji
-        $project = $this->getDoctrine()->getRepository('EditorImgeditorBundle:Project')->findOneBy(
-                array('id_project' => $id_project));
-
-        $action = $this->getDoctrine()->getRepository('EditorImgeditorBundle:Action')->findOneBy(
-                array('project' => $project->getId(), 'id_action' => $id_action_post), array('id' => 'DESC'), 1);
-        //ustalenie ostatniej pozycji akcji w projekcie i...
-        $action_position = $this->getDoctrine()->getRepository('EditorImgeditorBundle:Action')->findOneBy(
-                array('project' => $project->getId()), array('id' => 'DESC'), 1);
-        $position = $action_position->getPosition();
-        //... nadanie nowego nr pozycji
-        $position++;
-        $image = $action->getImage();
-
-        //nowa nazwa pliku po obróceniu
-        $new_img_name = uniqid() . '.jpeg';
-
-        $new_path = $project->getUploadDir() . '/' . $new_img_name;
+        // przydały by się też kierunki obratu (lewo prawo)
+        $degrees = 90;
+        // pobranie danych z Action na podstawie id_action
+        $dane = $this->getDataFromAction($id_action);
 
         // 2.
         // obrót obrazka
-
-        $obrazek = new Imagick($project->getUploadDir() . '/' . $image);
+        $obrazek = new Imagick($dane['project']->getUploadDir() . '/' . $dane['image']);
         $obrazek->rotateimage(new \ImagickPixel(), $degrees);
-        $obrazek->writeimage($new_path);
-
+        $obrazek->writeimage($dane['new_path']);
         // 3.
         // zapisanie danych do bazy 
         // jeśli obrazek 'rotate' wykona się poprawnie
-
-        $em = $this->getDoctrine()->getManager();
-
-        $id_action = uniqid();
-        $action = new Action();
-        $action->setIdAction($id_action);
-        $action->setImage($new_img_name);
-        // json_data nie będzie
-        $action->setPosition($position); //do pomyślenia ...
-        $action->setUpdated(new \DateTime());
-        $action->setProject($project);
-        $em->persist($action);
-        $em->flush();
-
+        $id_action = $this->saveToAction($dane['position'], $dane['new_img_name'], $dane['project']);
         // 4.
         // Tworzenie odpowiedzi
         $data = array(
             'status' => 'OK',
             'id_action' => $id_action,
-            'image' => $_SERVER['SERVER_NAME'] . '/' . $new_path
+            'image' => $_SERVER['SERVER_NAME'] . '/' . $dane['new_path']
         );
         return new JsonResponse($data, 200, array('Content-Type: application/json'));
-
     }
 
     /**
@@ -165,7 +131,6 @@ class DefaultController extends Controller {
      */
     public function cropAction() {
         
-        exit('crop');
     }
 
     /**
@@ -181,59 +146,75 @@ class DefaultController extends Controller {
     public function redoAction() {
         
     }
-    
-    
-    
+
     /**
      * 
      * @param type $id_action
      * @param type $asAction
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    public function fetchAction($id_action) {        
-        
-        $response = array(
-            'src' => '',
-            'id_action' => ''            
+    public function fetchAction($id_action) {
+        $action = $this->getDoctrine()->getRepository('EditorImgeditorBundle:Action')->findOneBy(
+                array('id_action' => $id_action)
         );
-        
-        return new JsonResponse($response);        
-        
-//        if($id_action == 'tojestidikakcjiobracania'){
-//             $response = array(
-//                'src'           => '/uploads/images/b7048e0e5a6636858307958bb9213d60.jpeg',
-//                'id_action'     => $id_action
-//            );
-//        }else{
-//        
-//        
-//            $repository = $this->getDoctrine()->getRepository('EditorImgeditorBundle:Action');
-//            $action = $repository->findOneBy(array('id_action' => $id_action));
-//
-//
-//
-//            $response = array(
-//                'src' => '/uploads/images/' . $action->getImage() . '.jpeg',
-//                'id_action' => $action->getIdAction()
-//            );
-//        }
-//
-//        if ($asAction === true) {
-//           
-//        } else {
-//            return $response;
-//        }
+
+        $src = '/' . $action->getUploadDir() . '/' . $action->getImage();
+
+        $response = array(
+            'src' => $src,
+            'id_action' => $id_action
+        );
+        return new JsonResponse($response);
     }
-    
+
+    private function getDataFromAction($id) {
+        // pobranie adresu do obrazka, ale lepiej by bylo jakbyś mi go przekazał 
+        //będzie znacznie mniej kombinacji
+        $action_repo = $this->getDoctrine()->getRepository('EditorImgeditorBundle:Action')->findOneBy(
+                array('id_action' => $id));
+        // ustalenie projektu do którego ma być przypisane akcja  
+        $project = $action_repo->getProject();
+        //ustalenie ostatniej pozycji akcji w projekcie i...
+        $position = $action_repo->getPosition();
+        //... nadanie nowego nr pozycji
+        $position++;
+        $image = $action_repo->getImage();
+        //nowa nazwa pliku po obróceniu
+        $new_img_name = uniqid() . '.jpeg';
+        // i nowa ścieżka do niego relatywna
+        $new_path = $project->getUploadDir() . '/' . $new_img_name;
+        //dane zwracane przez funkcje
+        $data_from_action = array(
+            'image' => $image,
+            'new_path' => $new_path,
+            'project' => $project,
+            'position' => $position,
+            'new_img_name' => $new_img_name,
+            'new_path' => $new_path
+        );
+
+        return $data_from_action;
+    }
+
     /**
-     * Pobiera rekord obrazka
      * 
-     * 
-     * @param string $id_action
+     * zapisuje dane do encji action i zwraca nowy numer akcji
+     * @return string $id_action
      */
-    private function getAction($id_action){
-        //$action = 
-        return $action;
+    private function saveToAction($position, $image, $project, $json_data = null) {
+        $id_action = uniqid();
+        $action = new Action();
+        $action->setIdAction($id_action);
+        $action->setImage($image);
+        $action->setJsonData($json_data);
+        $action->setPosition($position); //do pomyślenia ...
+        $action->setUpdated(new \DateTime());
+        $action->setProject($project);
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($action);
+        $em->flush();
+
+        return $id_action;
     }
 
 }
