@@ -42,7 +42,7 @@ class Project {
     private $created;
 
     /**
-      * @Assert\Image(
+     * @Assert\Image(
      *      maxWidth="6000",
      *      maxHeight="6000", 
      *      maxWidthMessage="Zdjęcie jest za duże max to {{ limit }}",
@@ -110,7 +110,7 @@ class Project {
         if (null !== $this->file) {
             // zrób cokolwiek chcesz aby wygenerować unikalną nazwę
             $this->path = uniqid() . '.' . $this->file->guessExtension();
-        }      
+        }
         $this->id_project = uniqid();
         $this->created = new \DateTime();
     }
@@ -127,16 +127,16 @@ class Project {
         // w tym przypadku encja nie zostanie zapisana do bazy
         // metoda move() obiektu UploadedFile robi to automatycznie
         $this->file->move($this->getUploadRootDir(), $this->path);
-        
+
         //resize do maksymalnego rozmiaru 800x600
         $obrazek = new \Imagick($this->getWebPath());
         $width = $obrazek->getimagewidth();
         $height = $obrazek->getimageheight();
-       
-        if($width>800){
+
+        if ($width > 800) {
             $obrazek->scaleimage(800, 0);
             $obrazek->writeimage();
-        }elseif($height>600) {
+        } elseif ($height > 600) {
             $obrazek->scaleimage(0, 600);
             $obrazek->writeimage();
         }
