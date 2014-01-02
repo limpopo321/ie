@@ -31,6 +31,14 @@ editor_imgeditor_grayscale:
     path: /grayscale/{id_action}
     defaults: { _controller: EditorImgeditorBundle:Default:grayscale }
     
+editor_imgeditor_sharpen:
+    path: /sharpen/{id_action}
+    defaults: { _controller: EditorImgeditorBundle:Default:sharpen }
+    
+editor_imgeditor_mirror:
+    path: /mirror/{id_action}
+    defaults: { _controller: EditorImgeditorBundle:Default:mirror }
+    
 editor_imgeditor_crop:
     path: /crop/{hash_kroku}
     defaults: { _controller: EditorImgeditorBundle:Default:crop }
