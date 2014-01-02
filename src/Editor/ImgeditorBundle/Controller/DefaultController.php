@@ -75,18 +75,16 @@ class DefaultController extends Controller {
             $em->persist($action);
 
             $em->flush();
-
-}
-            // 2.
-            // Tworzenie odpowiedzi
-            $data = array(
-                'status' => 'OK',
-                'id_action' => $action->getIdAction(),
-                'image' => $_SERVER['SERVER_NAME'] . '/' . $project->getWebPath()
-            );
-            return new JsonResponse($data, 200, array('Content-Type: application/json'));
-        
-      }
+        }
+        // 2.
+        // Tworzenie odpowiedzi
+        $data = array(
+            'status' => 'OK',
+            'id_action' => $action->getIdAction(),
+            'image' => $_SERVER['SERVER_NAME'] . '/' . $project->getWebPath()
+        );
+        return new JsonResponse($data, 200, array('Content-Type: application/json'));
+    }
 
     /**
      * Obracanie zdjecia o 90 stopni zgodnie ze wskazowkami zegara
@@ -106,22 +104,114 @@ class DefaultController extends Controller {
         // 3.
         // zapisanie danych do bazy 
         // jeśli obrazek 'rotate' wykona się poprawnie
-        $id_action = $this->saveToAction($dane['position'], $dane['new_img_name'], $dane['project']);
+        $data = $this->saveToAction($dane['position'], $dane['new_img_name'], $dane['project'], $dane['new_path']);
         // 4.
         // Tworzenie odpowiedzi
-        $data = array(
-            'status' => 'OK',
-            'id_action' => $id_action,
-            'image' => $_SERVER['SERVER_NAME'] . '/' . $dane['new_path']
-        );
+
         return new JsonResponse($data, 200, array('Content-Type: application/json'));
     }
 
     /**
      * Przycinanie obrazka
      */
-    public function cropAction() {
-        
+    public function cropAction($id_action) {
+        // potrzebne mi będą:
+        // szerokość, wysokość cropa oraz współrzędne lewego górnego rogu cropa w px oczywiście
+        $crop_width = 380;
+        $crop_height = 200;
+        $x = 20;
+        $y = 50;
+
+        // pobranie danych obrazka z encji
+        $dane = $this->getDataFromAction($id_action);
+        // crop
+        $obrazek = new Imagick($dane['project']->getUploadDir() . '/' . $dane['image']);
+        $obrazek->cropimage($crop_width, $crop_height, $x, $y);
+        $obrazek->writeimage($dane['new_path']);
+
+        // 3.
+        // zapisanie danych do bazy 
+        // jeśli crop wykona się poprawnie
+        $data = $this->saveToAction($dane['position'], $dane['new_img_name'], $dane['project'], $dane['new_path']);
+        // 4.
+        // Tworzenie odpowiedzi
+
+        return new JsonResponse($data, 200, array('Content-Type: application/json'));
+    }
+
+    /**
+     * 
+     * @param type $id_action
+     * @return type \Symfony\Component\HttpFoundation\JsonRespons
+     */
+    public function contrastAction($id_action) {
+        //potrzebny "skok" zakres mniej więcej -100 do 100 chociaż to i tak dużo raczej
+        // liczby całkowite
+        // skok co 2
+        // - to większy
+        // + to mniejszy
+        $level = -10;
+        //pobranie danych...
+        $dane = $this->getDataFromAction($id_action);
+        // zniejszanie/zwiększanie kontrastu
+
+        $img = imagecreatefromjpeg($dane['project']->getUploadDir() . '/' . $dane['image']);
+        imagefilter($img, IMG_FILTER_CONTRAST, $level);
+        imagejpeg($img, $dane['new_path']);
+        imagedestroy($img);
+
+        // 3.
+        // zapisanie danych do bazy 
+        // jeśli contrast wykona się poprawnie
+        $data = $this->saveToAction($dane['position'], $dane['new_img_name'], $dane['project'], $dane['new_path']);
+        // 4.
+        // Tworzenie odpowiedzi
+
+        return new JsonResponse($data, 200, array('Content-Type: application/json'));
+    }
+
+    public function brightnessAction($id_action) {
+        // liczby całkowite
+        // + to jaśniej 
+        // - to ciemniej
+        // 0 to bez zmian
+        // skoki co 10 
+        $brightness = 80;
+
+        $dane = $this->getDataFromAction($id_action);
+        $img = imagecreatefromjpeg($dane['project']->getUploadDir() . '/' . $dane['image']);
+        imagefilter($img, IMG_FILTER_BRIGHTNESS, $brightness);
+        imagejpeg($img, $dane['new_path']);
+        imagedestroy($img);
+
+        $data = $this->saveToAction($dane['position'], $dane['new_img_name'], $dane['project'], $dane['new_path']);
+
+        return new JsonResponse($data, 200, array('Content-Type: application/json'));
+    }
+
+    /**
+     * 
+     * @param type $id_action
+     * @return type \Symfony\Component\HttpFoundation\JsonRespons
+     */
+    public function grayscaleAction($id_action) {
+        //pobranie danych...
+        $dane = $this->getDataFromAction($id_action);
+        // zniejszanie/zwiększanie kontrastu
+
+        $img = imagecreatefromjpeg($dane['project']->getUploadDir() . '/' . $dane['image']);
+        imagefilter($img, IMG_FILTER_GRAYSCALE);
+        imagejpeg($img, $dane['new_path']);
+        imagedestroy($img);
+
+        // 3.
+        // zapisanie danych do bazy 
+        // jeśli contrast wykona się poprawnie
+        $data = $this->saveToAction($dane['position'], $dane['new_img_name'], $dane['project'], $dane['new_path']);
+        // 4.
+        // Tworzenie odpowiedzi
+
+        return new JsonResponse($data, 200, array('Content-Type: application/json'));
     }
 
     /**
@@ -189,10 +279,10 @@ class DefaultController extends Controller {
 
     /**
      * 
-     * zapisuje dane do encji action i zwraca nowy numer akcji
-     * @return string $id_action
+     * zapisuje dane do encji action i zwraca $data
+     * @return string $data
      */
-    private function saveToAction($position, $image, $project, $json_data = null) {
+    private function saveToAction($position, $image, $project, $new_path, $json_data = null) {
         $id_action = uniqid();
         $action = new Action();
         $action->setIdAction($id_action);
@@ -205,7 +295,13 @@ class DefaultController extends Controller {
         $em->persist($action);
         $em->flush();
 
-        return $id_action;
+        $data = array(
+            'status' => 'OK',
+            'id_action' => $id_action,
+            'image' => $_SERVER['SERVER_NAME'] . '/' . $new_path
+        );
+
+        return $data;
     }
 
 }
