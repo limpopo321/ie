@@ -23,7 +23,30 @@ class DefaultController extends Controller {
     public function indexAction() {        
         $project = new Project();
         $form = $this->createForm(new ProjectType(), $project);
-        return $this->render('EditorImgeditorBundle:Default:index.html.twig', array('form' => $form->createView(), 'baseUrl' => $this->getRequest()->getBaseUrl()));
+        
+        $router = $this->get('router');
+        
+        $ieoptions = json_encode(array(
+            'urls' => array(
+              'urlBase'         => $this->getRequest()->getBaseUrl(),
+              'urlProject'      => $router->generate('editor_imgeditor_project'),
+              'urlAction'       => $router->generate('editor_imgeditor_action', array('id_action' => ':id_action')),
+              'urlFetch'        => $router->generate('editor_imgeditor_fetch_action', array('id_action' => '')) . '/',
+              'urlRotate'       => $router->generate('editor_imgeditor_rotate', array('id_action' => ':id_action')),
+              'urlCrop'         => $router->generate('editor_imgeditor_crop', array('id_action' => ':id_action')),
+            )
+        ));
+        
+        
+        
+        
+        
+       
+       
+        
+        
+        
+        return $this->render('EditorImgeditorBundle:Default:index.html.twig', array('form' => $form->createView(), 'ieoptions' => $ieoptions));
     }
 
     /**

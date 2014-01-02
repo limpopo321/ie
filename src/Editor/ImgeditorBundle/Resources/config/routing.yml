@@ -8,11 +8,11 @@ editor_imgeditor_action:
     
 editor_imgeditor_fetch_action:
     path: /fetch/{id_action}
-    defaults: { _controller: EditorImgeditorBundle:Default:fetch }
+    defaults: { _controller: EditorImgeditorBundle:Default:fetch, id_action: ""  }
     
 editor_imgeditor_project:
     path: /create/
-    defaults: { _controller: EditorImgeditorBundle:Default:create, id_action: "" }   
+    defaults: { _controller: EditorImgeditorBundle:Default:create}   
 
     
 editor_imgeditor_rotate:
@@ -20,7 +20,7 @@ editor_imgeditor_rotate:
     defaults: { _controller: EditorImgeditorBundle:Default:rotate }
     
 editor_imgeditor_crop:
-    path: /crop/{hash_kroku}
+    path: /crop/{id_action}
     defaults: { _controller: EditorImgeditorBundle:Default:crop }
     
 editor_imgeditor_undo:

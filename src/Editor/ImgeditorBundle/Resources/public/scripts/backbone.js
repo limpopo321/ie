@@ -228,7 +228,6 @@
   // Aliases for backwards compatibility.
   Events.bind   = Events.on;
   Events.unbind = Events.off;
-
   // Allow the `Backbone` object to serve as a global event bus, for folks who
   // want global "pubsub" in a convenient place.
   _.extend(Backbone, Events);
@@ -1236,6 +1235,10 @@
         name = '';
       }
       if (!callback) callback = this[name];
+      
+      console.log("name");
+      console.log("callback", callback);
+      
       var router = this;
       Backbone.history.route(route, function(fragment) {
         var args = router._extractParameters(route, fragment);
@@ -1438,6 +1441,7 @@
     // calls `loadUrl`, normalizing across the hidden iframe.
     checkUrl: function(e) {
       var current = this.getFragment();
+      console.log("current", current);
       if (current === this.fragment && this.iframe) {
         current = this.getFragment(this.getHash(this.iframe));
       }
