@@ -216,6 +216,75 @@ class DefaultController extends Controller {
     }
 
     /**
+     * 
+     * @param type $id_action
+     * @return type \Symfony\Component\HttpFoundation\JsonRespons
+     */
+    public function sharpenAction($id_action) {
+        // potrzebny promień wyostrzenia i odchylenie standardowe(sigma)
+        // skoki co 1 lub co 0,5
+        // typ float
+
+        $radius = 1;
+        $sigma = 0;
+
+        //pobranie danych...
+        $dane = $this->getDataFromAction($id_action);
+        // zwiększanie wyostrzenia
+
+        $obrazek = new Imagick($dane['project']->getUploadDir() . '/' . $dane['image']);
+        $obrazek->sharpenimage($radius, $sigma);
+        $obrazek->writeimage($dane['new_path']);
+        $obrazek->destroy();
+
+        // 3.
+        // zapisanie danych do bazy 
+        // jeśli contrast wykona się poprawnie
+        $data = $this->saveToAction($dane['position'], $dane['new_img_name'], $dane['project'], $dane['new_path']);
+        // 4.
+        // Tworzenie odpowiedzi
+
+        return new JsonResponse($data, 200, array('Content-Type: application/json'));
+    }
+
+    /**
+     * 
+     * @param type $id_action
+     * @return type \Symfony\Component\HttpFoundation\JsonRespons
+     */
+    public function mirrorAction($id_action) {
+        // potrzebny rodzaj:
+        // 0 to w pionie
+        // 1 to w poziomie
+
+        $flip = 0;
+
+        //pobranie danych...
+        $dane = $this->getDataFromAction($id_action);
+        // zwiększanie wyostrzenia
+
+        $obrazek = new Imagick($dane['project']->getUploadDir() . '/' . $dane['image']);
+
+        if ($flip === 0) {
+            $obrazek->flipimage();
+            $obrazek->writeimage($dane['new_path']);
+            $obrazek->destroy();
+        } elseif ($flip === 1) {
+            $obrazek->flopimage();
+            $obrazek->writeimage($dane['new_path']);
+            $obrazek->destroy();
+        }
+        // 3.
+        // zapisanie danych do bazy 
+        // jeśli contrast wykona się poprawnie
+        $data = $this->saveToAction($dane['position'], $dane['new_img_name'], $dane['project'], $dane['new_path']);
+        // 4.
+        // Tworzenie odpowiedzi
+
+        return new JsonResponse($data, 200, array('Content-Type: application/json'));
+    }
+
+    /**
      * "Wstecz"
      */
     public function undoAction() {
