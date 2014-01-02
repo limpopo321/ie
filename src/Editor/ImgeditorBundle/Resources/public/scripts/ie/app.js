@@ -27,12 +27,6 @@ IE.init = function(options){
        root: ''
     });
     
-    
-//    router.navigate('app_dev.php/action/blablabla');
-//    router.navigate('app_dev.php/action/blablabla1');
-    
-    
-    
 };
 
 
@@ -109,7 +103,8 @@ IE.ViewProject = Backbone.View.extend({
 IE.ViewAction = Backbone.View.extend({    
     events: {
         "click #btn-rotate": "rotate",
-        "click #btn-undo": "undo"
+        "click #btn-undo": "undo",
+        "click #btn-select": "select"
     },
     initialize: function(options){
         this.idTpl          = options.idTpl;
@@ -128,11 +123,32 @@ IE.ViewAction = Backbone.View.extend({
     },
     rotate: function() {
         var self = this;
+        if(this.areaSelect){
+            var image = this.$el.find("img").get(0);
+            $(image).imgAreaSelect({remove: true});
+        }
         var url_rotate = self.router.registry.getUrl("urlRotate", this.model.id);
         $.post(url_rotate, function(data) {
             self.router.navigate(self.router.registry.getUrl("urlAction", data.id_action), {trigger: true, replace: false});
         });
     },
+    
+    select: function(){
+        var image = this.$el.find("img").get(0);
+        
+        this.areaSelect = $(image).imgAreaSelect({
+           handles: true,
+           instance: true
+        });
+        
+//         this.areaSelect.cancelSelection();
+      
+        
+        
+    },
+    
+    
+    
     undo: function() {
 
     }

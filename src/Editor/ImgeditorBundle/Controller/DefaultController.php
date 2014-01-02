@@ -35,16 +35,7 @@ class DefaultController extends Controller {
               'urlRotate'       => $router->generate('editor_imgeditor_rotate', array('id_action' => ':id_action')),
               'urlCrop'         => $router->generate('editor_imgeditor_crop', array('id_action' => ':id_action')),
             )
-        ));
-        
-        
-        
-        
-        
-       
-       
-        
-        
+        ));        
         
         return $this->render('EditorImgeditorBundle:Default:index.html.twig', array('form' => $form->createView(), 'ieoptions' => $ieoptions));
     }
