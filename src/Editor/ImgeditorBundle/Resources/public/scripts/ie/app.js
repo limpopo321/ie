@@ -128,7 +128,25 @@ IE.ViewAction = Backbone.View.extend({
           this.selectionEl          = this.$el.find("img").get(0);
           this.selectionInstance    =  $(this.selectionEl).imgAreaSelect({
               handles: true,
-              instance: true
+              instance: true,
+              show: true,
+              onInit: function(img){                  
+                  // Wybrany obszar znajduje sie w srodku obrazka i ma 
+                  // wysokosc i szerokosc rowna 1/3 wysokosci i szerokosci obrazka                  
+                  var w = $(img).width();
+                  var h = $(img).height();
+                  
+                  var partW = w / 3;
+                  var partH = h / 3;
+                  
+                  var x1 = partW;
+                  var y1 = partH;
+                  var x2 = x1 + partW;
+                  var y2 = y1 + partH;
+                  
+                  this.setSelection(x1, y1, x2, y2);
+                  this.update();                                       
+              }
           });
       }          
     },
@@ -174,10 +192,7 @@ IE.ViewAction = Backbone.View.extend({
      */
     rotate: function() {
         var self = this;
-        if(this.areaSelect){
-            var image = this.$el.find("img").get(0);
-            $(image).imgAreaSelect({remove: true});
-        }
+        this.cancelSelection();
         var url_rotate = self.router.registry.getUrl("urlRotate", this.model.id);
         $.post(url_rotate, function(data) {
             self.router.navigate(self.router.registry.getUrl("urlAction", data.id_action), {trigger: true, replace: false});
@@ -317,16 +332,3 @@ IE.ViewAction = Backbone.View.extend({
         this.action.fetch();
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -472,8 +472,10 @@ $.imgAreaSelect = function (img, options) {
             update();
             $box.add($outer).hide().fadeIn(options.fadeSpeed||0);
         }
+        
+        setTimeout($.proxy(options.onInit, this, img, getSelection()), 0);
 
-        setTimeout(function () { options.onInit(img, getSelection()); }, 0);
+   
     }
 
     var docKeyPress = function(event) {
@@ -661,6 +663,9 @@ $.imgAreaSelect = function (img, options) {
     this.cancelSelection = cancelSelection;
 
     this.update = doUpdate;
+   
+    // Dodane przez Paweł Dudka
+    this.imgLoad = imgLoad;
 
     var msie = (/msie ([\w.]+)/i.exec(ua)||[])[1],
         opera = /opera/i.test(ua),
@@ -695,7 +700,7 @@ $.imgAreaSelect = function (img, options) {
     $area.add($border).css({ position: 'absolute', fontSize: 0 });
 
     img.complete || img.readyState == 'complete' || !$img.is('img') ?
-        imgLoad() : $img.one('load', imgLoad);
+        this.imgLoad() : $img.one('load', imgLoad);
 
     if (!imgLoaded && msie && msie >= 7)
         img.src = img.src;
