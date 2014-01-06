@@ -50,3 +50,7 @@ editor_imgeditor_undo:
 editor_imgeditor_redo:
     path: /redo/{hash_kroku}
     defaults: { _controller: EditorImgeditorBundle:Default:redo }
+    
+app_brightness:
+    path: /app/brightness
+    defaults: { _controller: EditorImgeditorBundle:App:brightness }

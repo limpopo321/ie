@@ -176,8 +176,10 @@ class DefaultController extends Controller {
         // + to jaśniej 
         // - to ciemniej
         // 0 to bez zmian
-        // skoki co 10 
-        $brightness = 80;
+        // skoki co 10         
+        /*$brightness = 80;*/ $brightness = $this->getRequest()->request->get('v');
+        
+//        exit($brightness);
 
         $dane = $this->getDataFromAction($id_action);
         $img = imagecreatefromjpeg($dane['project']->getUploadDir() . '/' . $dane['image']);
