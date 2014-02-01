@@ -1,6 +1,6 @@
 <?php
 
-
+exit('to jest już koniec');
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Debug\Debug;
